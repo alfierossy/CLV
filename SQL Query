@@ -1,0 +1,56 @@
+														
+WITH														
+start AS (														
+SELECT														
+DISTINCT user_pseudo_id,														
+DATE_TRUNC(min(PARSE_DATE('%Y%m%d', event_date)), WEEK) as start_week,														
+FROM tc-da-1.turing_data_analytics.raw_events														
+GROUP BY 1														
+),														
+purchase_week AS (														
+SELECT														
+user_pseudo_id,														
+purchase_revenue_in_usd,														
+DATE_TRUNC(PARSE_DATE('%Y%m%d', event_date), WEEK) as event_date,														
+FROM tc-da-1.turing_data_analytics.raw_events														
+),														
+cohort AS (														
+SELECT start.start_week reg_week,														
+COUNT(DISTINCT start.user_pseudo_id) as users,														
+SUM(CASE WHEN purchase_week.event_date BETWEEN start.start_week AND DATE_ADD(start.start_week, INTERVAL 6 DAY) THEN purchase_revenue_in_usd ELSE NULL END)/COUNT(DISTINCT start.user_pseudo_id) week_0,														
+SUM(CASE WHEN event_date BETWEEN DATE_ADD(start_week, INTERVAL 1 WEEK) AND DATE_ADD(start_week, INTERVAL 13 DAY) THEN purchase_revenue_in_usd ELSE NULL END)/COUNT(DISTINCT start.user_pseudo_id) week_1,														
+SUM(CASE WHEN event_date BETWEEN DATE_ADD(start_week, INTERVAL 2 WEEK) AND DATE_ADD(start_week, INTERVAL 20 DAY) THEN purchase_revenue_in_usd ELSE NULL END)/COUNT(DISTINCT start.user_pseudo_id) week_2,														
+SUM(CASE WHEN event_date BETWEEN DATE_ADD(start_week, INTERVAL 3 WEEK) AND DATE_ADD(start_week, INTERVAL 27 DAY) THEN purchase_revenue_in_usd ELSE NULL END)/COUNT(DISTINCT start.user_pseudo_id) week_3,														
+SUM(CASE WHEN event_date BETWEEN DATE_ADD(start_week, INTERVAL 4 WEEK) AND DATE_ADD(start_week, INTERVAL 34 DAY) THEN purchase_revenue_in_usd ELSE NULL END)/COUNT(DISTINCT start.user_pseudo_id) week_4,														
+SUM(CASE WHEN event_date BETWEEN DATE_ADD(start_week, INTERVAL 5 WEEK) AND DATE_ADD(start_week, INTERVAL 41 DAY) THEN purchase_revenue_in_usd ELSE NULL END)/COUNT(DISTINCT start.user_pseudo_id) week_5,														
+SUM(CASE WHEN event_date BETWEEN DATE_ADD(start_week, INTERVAL 6 WEEK) AND DATE_ADD(start_week, INTERVAL 48 DAY) THEN purchase_revenue_in_usd ELSE NULL END)/COUNT(DISTINCT start.user_pseudo_id) week_6,														
+SUM(CASE WHEN event_date BETWEEN DATE_ADD(start_week, INTERVAL 7 WEEK) AND DATE_ADD(start_week, INTERVAL 55 DAY) THEN purchase_revenue_in_usd ELSE NULL END)/COUNT(DISTINCT start.user_pseudo_id) week_7,														
+SUM(CASE WHEN event_date BETWEEN DATE_ADD(start_week, INTERVAL 8 WEEK) AND DATE_ADD(start_week, INTERVAL 62 DAY) THEN purchase_revenue_in_usd ELSE NULL END)/COUNT(DISTINCT start.user_pseudo_id) week_8,														
+SUM(CASE WHEN event_date BETWEEN DATE_ADD(start_week, INTERVAL 9 WEEK) AND DATE_ADD(start_week, INTERVAL 69 DAY) THEN purchase_revenue_in_usd ELSE NULL END)/COUNT(DISTINCT start.user_pseudo_id) week_9,														
+SUM(CASE WHEN event_date BETWEEN DATE_ADD(start_week, INTERVAL 10 WEEK) AND DATE_ADD(start_week, INTERVAL 76 DAY) THEN purchase_revenue_in_usd ELSE NULL END)/COUNT(DISTINCT start.user_pseudo_id) week_10,														
+SUM(CASE WHEN event_date BETWEEN DATE_ADD(start_week, INTERVAL 11 WEEK) AND DATE_ADD(start_week, INTERVAL 83 DAY) THEN purchase_revenue_in_usd ELSE NULL END)/COUNT(DISTINCT start.user_pseudo_id) week_11,														
+SUM(CASE WHEN event_date BETWEEN DATE_ADD(start_week, INTERVAL 12 WEEK) AND DATE_ADD(start_week, INTERVAL 90 DAY) THEN purchase_revenue_in_usd ELSE NULL END)/COUNT(DISTINCT start.user_pseudo_id) week_12,														
+FROM start														
+LEFT JOIN purchase_week														
+ON start.user_pseudo_id = purchase_week.user_pseudo_id														
+WHERE start_week <= '2021-01-24'														
+GROUP BY start.start_week														
+ORDER BY start.start_week)														
+														
+SELECT														
+reg_week,														
+users,														
+ROUND(week_0, 2) week_0,														
+ROUND(week_1, 2) week_1,														
+ROUND(week_2, 2) week_2,														
+ROUND(week_3, 2) week_3,														
+ROUND(week_4, 2) week_4,														
+ROUND(week_5, 2) week_5,														
+ROUND(week_6, 2) week_6,														
+ROUND(week_7, 2) week_7,														
+ROUND(week_8, 2) week_8,														
+ROUND(week_9, 2) week_9,														
+ROUND(week_10, 2) week_10,														
+ROUND(week_11, 2) week_11,														
+ROUND(week_12, 2)week_12,														
+FROM cohort														
